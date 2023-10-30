@@ -20,6 +20,7 @@ use yii\behaviors\BlameableBehavior;
 class Item extends \yii\db\ActiveRecord
 {
     const EVENT_VIEW_INDEX = 'view_index';
+    
     /**
      * {@inheritdoc}
      */

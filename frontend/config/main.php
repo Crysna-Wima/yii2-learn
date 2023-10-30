@@ -42,6 +42,7 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'customer/show-order' => 'customer/show-order', // 'customer/show-order' adalah URL yang diinginkan
             ],
         ],
     ],

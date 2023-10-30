@@ -7,6 +7,7 @@ use backend\models\ItemSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * ItemController implements the CRUD actions for Item model.
@@ -68,19 +69,41 @@ class ItemController extends Controller
     public function actionCreate()
     {
         $model = new Item();
-
+    
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            $model->load($this->request->post());
+            $model->gambar = UploadedFile::getInstance($model, 'gambar'); // Handle uploaded image file
+    
+            if ($model->validate()) {
+                if ($model->save()) {
+                    if ($model->gambar && is_uploaded_file($model->gambar->tempName)) {
+                        $uploadPath = 'uploads/';
+                        if (!is_dir($uploadPath)) {
+                            mkdir($uploadPath, 0777, true);
+                        }
+    
+                        $newImagePath = $uploadPath . $model->gambar->baseName . '.' . $model->gambar->extension;
+    
+                        if ($model->gambar->saveAs($newImagePath)) {
+                            $model->gambar = $model->gambar->baseName . '.' . $model->gambar->extension;
+                            $model->save(); // Save the file path (without "uploads/") to the database
+                        } else {
+                            throw new \Exception('Failed to save file to ' . $uploadPath);
+                        }
+                    }
+    
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
             }
         } else {
             $model->loadDefaultValues();
         }
-
+    
         return $this->render('create', [
             'model' => $model,
         ]);
     }
+    
 
     /**
      * Updates an existing Item model.
@@ -90,17 +113,42 @@ class ItemController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
+{
+    $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+    if ($this->request->isPost) {
+        $model->load($this->request->post());
+        $newImage = UploadedFile::getInstance($model, 'gambar'); // Handle uploaded image file
+
+        if ($model->validate()) {
+            if ($model->save()) {
+                if ($newImage && is_uploaded_file($newImage->tempName)) {
+                    $uploadPath = 'uploads/';
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+
+                    $newImagePath = $uploadPath . $newImage->baseName . '.' . $newImage->extension;
+
+                    if ($newImage->saveAs($newImagePath)) {
+                        $model->gambar = $newImage->baseName . '.' . $newImage->extension;
+                        $model->save(); // Save the file path (without "uploads/") to the database
+                    } else {
+                        throw new \Exception('Failed to save file to ' . $uploadPath);
+                    }
+                }
+
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+    } else {
+        $model->loadDefaultValues();
     }
+
+    return $this->render('update', [
+        'model' => $model,
+    ]);
+}
 
     /**
      * Deletes an existing Item model.

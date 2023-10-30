@@ -8,6 +8,8 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
+use backend\models\Item;
+use yii\data\ActiveDataProvider;
 
 /**
  * Site controller
@@ -22,15 +24,13 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
+                'only' => ['index'], // Apply the rules to the 'index' action
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['index'],
                         'allow' => true,
-                    ],
-                    [
-                        'actions' => ['logout', 'index'],
-                        'allow' => true,
-                        'roles' => ['@'],
+                        // Allow users, authenticated and guests, to access the 'index' action
+                        'roles'=> ['@', '?'],
                     ],
                 ],
             ],
@@ -62,8 +62,33 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        // Create a query for the 'item' table
+        $query = (new \yii\db\Query())
+            ->select(['item.*', 'item_category.name AS category_name', 'item_category.id AS category_id'])
+            ->from('item')
+            ->join('INNER JOIN', 'item_category', 'item.category_id = item_category.id')
+            ->orderBy('id DESC');
+    
+        // Create a data provider with the query and configure pagination
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 3, // Set the number of items per page
+            ],
+        ]);
+    
+        // Load the categories from the database and pass them to the view
+        $categories = (new \yii\db\Query())
+            ->select(['id', 'name'])
+            ->from('item_category')
+            ->all();
+    
+        return $this->render('index', [
+            'dataProvider' => $dataProvider,
+            'categories' => $categories, // Pass the categories to the view
+        ]);
     }
+    
 
     /**
      * Login action.

@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Class m231008_085904_add_timestamp_and_blameable_to_item
  */
-class m231008_085904_add_timestamp_and_blameable_to_item extends Migration
+class m231029_085904_add_timestamp_and_blameable_to_item extends Migration
 {
     /**
      * {@inheritdoc}

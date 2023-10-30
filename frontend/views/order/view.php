@@ -2,17 +2,16 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use yii\helpers\Url;
 
 /** @var yii\web\View $this */
-/** @var backend\models\Item $model */
+/** @var frontend\models\Order $model */
 
-$this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Items', 'url' => ['index']];
+$this->title = $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Orders', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="item-view">
+<div class="order-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -31,16 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'category_id',
-            'name',
-            'price',
-            [
-                'attribute' => 'gambar',
-                'format' => 'raw',
-                'value' => function ($model) {
-                    return Html::img(Url::to($model->gambar), ['width' => '100']);
-                },
-            ],
+            'date',
+            'customer_id',
         ],
     ]) ?>
 
